@@ -10,6 +10,7 @@ import EggsPage from './features/eggs/ui/EggsPage'
 import ExpensesPage from './features/expenses/ui/ExpensesPage'
 import MedicationsPage from './features/medications/ui/MedicationsPage'
 import MortalityPage from './features/mortality/ui/MortalityPage'
+import VaccinationGuidePage from './features/vaccination/ui/VaccinationGuidePage'
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/batches/:id/expenses" element={<ExpensesPage />} />
           <Route path="/batches/:id/medications" element={<MedicationsPage />} />
           <Route path="/batches/:id/mortality" element={<MortalityPage />} />
+          <Route path="/batches/:id/vaccination" element={<VaccinationGuidePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
         <InstallPrompt />

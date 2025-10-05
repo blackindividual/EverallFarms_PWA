@@ -3,6 +3,9 @@ import { useState } from 'react'
 import { useBatchesViewModel } from '../vm/useBatchesViewModel'
 import type { BirdType } from '../../../core/birds'
 import { BIRD_TYPES } from '../../../core/birds'
+import { EditBatchDialog } from './EditBatchDialog'
+import { ConfirmDialog } from '../../../app/components/ConfirmDialog'
+import { deleteBatchCascade } from '../data/deleteBatchCascade'
 
 type Form = {
   name: string
@@ -24,6 +27,9 @@ export default function BatchesPage() {
   const { state, actions } = useBatchesViewModel()
   const [form, setForm] = useState<Form>(defaultForm)
   const [busy, setBusy] = useState(false)
+  const [query, setQuery] = useState('')
+  const [editId, setEditId] = useState<string | null>(null)
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
 
   async function onCreate(e: React.FormEvent) {
     e.preventDefault()
@@ -44,6 +50,9 @@ export default function BatchesPage() {
   return (
     <div className="p-6">
       <h1 className="mb-4">Batches</h1>
+      <div className="mb-4" style={{maxWidth:560}}>
+        <input value={query} onChange={(e)=>setQuery(e.target.value)} placeholder="Search by name" style={{border:'1px solid #000', padding:'12px 14px', minHeight:56, borderRadius:8, width:'100%'}} />
+      </div>
       {state.error && (
         <div className="mb-3" style={{background:'#000', color:'#fff', padding:12, borderRadius:8}}>
           {state.error}
@@ -107,7 +116,11 @@ export default function BatchesPage() {
           <p className="opacity-80">No batches yet.</p>
         ) : (
           <ul className="grid gap-2" style={{maxWidth: 640}}>
-            {state.items.map((b) => (
+            {state.items
+              .slice()
+              .sort((a,b)=> (a.startDate===b.startDate? a.name.localeCompare(b.name) : (a.startDate>b.startDate? -1:1)))
+              .filter(b => b.name.toLowerCase().includes(query.toLowerCase()))
+              .map((b) => (
               <li key={b.id} className="flex items-center justify-between" style={{border:'1px solid #000', borderRadius:8, padding:'12px 14px'}}>
                 <div>
                   <div style={{fontWeight:600}}>{b.name}</div>
@@ -115,13 +128,28 @@ export default function BatchesPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <Link to={`/batches/${b.id}`} style={{textDecoration:'underline'}}>Open</Link>
-                  <button onClick={() => actions.remove(b.id)} style={{background:'#fff', color:'#000', border:'1px solid #000', borderRadius:8, padding:'10px 12px', minHeight:48}}>Delete</button>
+                  <button onClick={()=>setEditId(b.id)} style={{background:'#fff', color:'#000', border:'1px solid #000', borderRadius:8, padding:'10px 12px', minHeight:48}}>Edit</button>
+                  <button onClick={()=>setConfirmDeleteId(b.id)} style={{background:'#fff', color:'#000', border:'1px solid #000', borderRadius:8, padding:'10px 12px', minHeight:48}}>Delete</button>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </section>
+
+      {editId && (
+        <EditBatchDialog open batchId={editId} onClose={()=>setEditId(null)} />
+      )}
+      {confirmDeleteId && (
+        <ConfirmDialog
+          open
+          title="Delete Batch"
+          message="This will delete the batch and ALL related records (weights, eggs, expenses, medications, mortality, reminders). This action cannot be undone."
+          confirmText="Delete"
+          onCancel={()=>setConfirmDeleteId(null)}
+          onConfirm={async ()=>{ await deleteBatchCascade(confirmDeleteId); setConfirmDeleteId(null); }}
+        />
+      )}
     </div>
   )
 }

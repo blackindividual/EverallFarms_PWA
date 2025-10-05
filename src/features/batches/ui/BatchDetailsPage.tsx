@@ -32,6 +32,7 @@ export default function BatchDetailsPage() {
             <button onClick={()=>setOpenMortality(true)} style={{background:'#000', color:'#fff', borderRadius:8, padding:'12px 16px', minHeight:56}}>Record Mortality</button>
             <button onClick={()=>setOpenEggs(true)} style={{background:'#000', color:'#fff', borderRadius:8, padding:'12px 16px', minHeight:56}}>Record Eggs</button>
             <button onClick={()=>setOpenExpense(true)} style={{background:'#000', color:'#fff', borderRadius:8, padding:'12px 16px', minHeight:56}}>Record Expense</button>
+            <Link to={`/batches/${id}/vaccination`} style={{textDecoration:'underline', alignSelf:'center'}}>Vaccination Guide</Link>
           </div>
         </div>
       )}
